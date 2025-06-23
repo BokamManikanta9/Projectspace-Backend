@@ -307,6 +307,99 @@ const getMonthlyContestParticipation = async (req, res) => {
 
 
 
+const getWeeklyContestParticipation = async (req, res) => {
+  try {
+    const pipeline = [
+      { $unwind: "$codingContestsTaken" },
+      {
+        $addFields: {
+          day: { $dayOfMonth: "$codingContestsTaken.dateTaken" }
+        }
+      },
+      {
+        $addFields: {
+          week: {
+            $switch: {
+              branches: [
+                { case: { $lte: ["$day", 7] }, then: "Week 1" },
+                { case: { $lte: ["$day", 14] }, then: "Week 2" },
+                { case: { $lte: ["$day", 21] }, then: "Week 3" },
+                { case: { $lte: ["$day", 31] }, then: "Week 4" }
+              ],
+              default: "Unknown"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$codingContestsTaken.dateTaken" },
+            month: { $month: "$codingContestsTaken.dateTaken" },
+            week: "$week"
+          },
+          participants: { $addToSet: "$email" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          month: "$_id.month",
+          week: "$_id.week",
+          participantsCount: { $size: "$participants" }
+        }
+      },
+      { $sort: { year: 1, month: 1, week: 1 } }
+    ];
+
+    const result = await User.aggregate(pipeline);
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const formatted = result.map(r => ({
+      month: `${monthNames[r.month - 1]} ${r.year}`,
+      week: r.week,
+      participants: r.participantsCount
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Error in getWeeklyContestParticipation:", err);
+    res.status(500).json({ message: "Failed to fetch weekly participation" });
+  }
+};
+
+
+
+
+
+
+
+const getStudentProfile = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const student = await User.findOne({ email }).select("-password");
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json(student);
+  } catch (error) {
+    console.error("Error fetching student profile:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+
+
+
+
+
+
 module.exports = {
   registerUser,
   loginUser,
@@ -317,5 +410,7 @@ module.exports = {
   getTotalContests,
   getContestParticipants,
   getContestParticipationPercentage,
-   getMonthlyContestParticipation
+   getMonthlyContestParticipation,
+   getWeeklyContestParticipation,
+   getStudentProfile
 };
