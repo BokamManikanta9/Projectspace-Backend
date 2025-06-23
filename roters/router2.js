@@ -39,6 +39,6 @@ route.get('/contest-participants', getContestParticipants);
 route.get('/contest-percentage', getContestParticipationPercentage);
 route.get('/monthly-contest-participation', getMonthlyContestParticipation);
 route.get("/weekly-contest-participation", getWeeklyContestParticipation);
-route.get("/student/:email", getStudentProfile);
+route.post("/get-student-by-email", getStudentProfile);
 
 module.exports = route;

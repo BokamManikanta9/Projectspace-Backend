@@ -378,7 +378,11 @@ const getWeeklyContestParticipation = async (req, res) => {
 
 const getStudentProfile = async (req, res) => {
   try {
-    const { email } = req.params;
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
     const student = await User.findOne({ email }).select("-password");
 
@@ -388,8 +392,8 @@ const getStudentProfile = async (req, res) => {
 
     res.json(student);
   } catch (error) {
-    console.error("Error fetching student profile:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Error fetching student by email:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
