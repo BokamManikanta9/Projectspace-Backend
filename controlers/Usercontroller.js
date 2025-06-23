@@ -39,6 +39,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
+
   if (!email || !password)
     return res.status(400).json({ message: 'Email and password are required' });
 
@@ -50,6 +51,9 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(401).json({ message: 'Invalid credentials' });
+
+    user.loginHistory.push(new Date());
+    await user.save();
 
     user.loginCount += 1;
     user.lastLogin = new Date();
@@ -197,7 +201,7 @@ const getTotalUsers = async (req, res) => {
 const getTotalContests = async (req, res) => {
   try {
     const users = await User.find({}, 'codingContestsTaken.contestCode');
-    
+
     const uniqueContests = new Set();
 
     users.forEach(user => {
@@ -295,7 +299,7 @@ const getMonthlyContestParticipation = async (req, res) => {
     const result = await User.aggregate(pipeline);
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // Format result
     const formatted = result.map(r => ({
@@ -490,9 +494,9 @@ module.exports = {
   getTotalContests,
   getContestParticipants,
   getContestParticipationPercentage,
-   getMonthlyContestParticipation,
-   getWeeklyContestParticipation,
-   getStudentProfile,
-   getDriveParticipationStats ,
-   getAllStudentTestSummary 
+  getMonthlyContestParticipation,
+  getWeeklyContestParticipation,
+  getStudentProfile,
+  getDriveParticipationStats,
+  getAllStudentTestSummary
 };

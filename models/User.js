@@ -9,6 +9,11 @@ const UserSchema = new mongoose.Schema({
  
 //   loginCount: { type: Number, default: 0 },
 //   lastLogin: { type: Date },
+    loginHistory: [
+    {
+      type: Date
+    }
+  ],
 
   codingContestsTaken: [
     {
