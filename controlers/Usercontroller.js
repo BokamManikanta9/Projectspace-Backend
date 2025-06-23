@@ -196,17 +196,25 @@ const getTotalUsers = async (req, res) => {
 // ---------------------------------------------
 const getTotalContests = async (req, res) => {
   try {
-    const users = await User.find({}, 'codingContestsTaken');
-    let totalContests = 0;
+    const users = await User.find({}, 'codingContestsTaken.contestCode');
+    
+    const uniqueContests = new Set();
+
     users.forEach(user => {
-      totalContests += user.codingContestsTaken.length;
+      user.codingContestsTaken.forEach(contest => {
+        if (contest.contestCode) {
+          uniqueContests.add(contest.contestCode);
+        }
+      });
     });
-    res.json({ totalContests });
+
+    res.json({ totalContests: uniqueContests.size });
   } catch (err) {
     console.error('Error in getTotalContests:', err);
     res.status(500).json({ message: 'Error fetching total contest count' });
   }
 };
+
 
 // ---------------------------------------------
 // @desc    Get number of students who participated in at least one contest
