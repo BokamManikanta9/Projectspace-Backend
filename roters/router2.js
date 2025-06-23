@@ -17,6 +17,7 @@ const {
   getMonthlyContestParticipation,
   getWeeklyContestParticipation,
   getStudentProfile ,
+  getDriveParticipationStats 
 } = require('../controlers/Usercontroller');
 
 
@@ -40,5 +41,6 @@ route.get('/contest-percentage', getContestParticipationPercentage);
 route.get('/monthly-contest-participation', getMonthlyContestParticipation);
 route.get("/weekly-contest-participation", getWeeklyContestParticipation);
 route.post("/get-student-by-email", getStudentProfile);
+route.get("/drive-participation", getDriveParticipationStats);
 
 module.exports = route;

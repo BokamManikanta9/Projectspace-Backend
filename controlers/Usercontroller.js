@@ -410,6 +410,38 @@ const getStudentProfile = async (req, res) => {
 
 
 
+const getDriveParticipationStats = async (req, res) => {
+  try {
+    const users = await User.find({});
+
+    const participatedInContest = new Set();
+    const participatedInMCQ = new Set();
+    const participatedInAI = new Set();
+
+    users.forEach(user => {
+      if (user.codingContestsTaken.length > 0) {
+        participatedInContest.add(user.email);
+      }
+      if (user.mcqTestsTaken.length > 0) {
+        participatedInMCQ.add(user.email);
+      }
+      if (user.aiMockInterviewsTaken.length > 0) {
+        participatedInAI.add(user.email);
+      }
+    });
+
+    res.json([
+      { category: "Coding Contest", count: participatedInContest.size },
+      { category: "AI Interview", count: participatedInAI.size },
+      { category: "MCQ'S", count: participatedInMCQ.size },
+    ]);
+  } catch (error) {
+    console.error("Error fetching drive participation stats:", error);
+    res.status(500).json({ message: "Error fetching drive participation stats" });
+  }
+};
+
+
 
 
 
@@ -427,5 +459,6 @@ module.exports = {
   getContestParticipationPercentage,
    getMonthlyContestParticipation,
    getWeeklyContestParticipation,
-   getStudentProfile
+   getStudentProfile,
+   getDriveParticipationStats 
 };
