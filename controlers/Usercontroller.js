@@ -443,6 +443,39 @@ const getDriveParticipationStats = async (req, res) => {
 
 
 
+const getAllStudentTestSummary = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    const summary = users.map((user) => {
+      const codingCount = user.codingContestsTaken?.length || 0;
+      const mcqCount = user.mcqTestsTaken?.length || 0;
+      const interviewCount = user.aiMockInterviewsTaken?.length || 0;
+
+      const totalTestsTaken = codingCount + mcqCount + interviewCount;
+
+      const codingScore = user.codingContestsTaken.reduce((sum, c) => sum + (c.score || 0), 0);
+      const mcqScore = user.mcqTestsTaken.reduce((sum, m) => sum + (m.score || 0), 0);
+      const interviewScore = user.aiMockInterviewsTaken.reduce((sum, i) => sum + (i.score || 0), 0);
+
+      const totalScore = codingScore + mcqScore + interviewScore;
+
+      return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        totalTestsTaken,
+        totalScore,
+      };
+    });
+
+    res.json(summary);
+  } catch (err) {
+    console.error("Error fetching student summaries:", err);
+    res.status(500).json({ message: "Failed to fetch student test summaries" });
+  }
+};
+
 
 
 
@@ -460,5 +493,6 @@ module.exports = {
    getMonthlyContestParticipation,
    getWeeklyContestParticipation,
    getStudentProfile,
-   getDriveParticipationStats 
+   getDriveParticipationStats ,
+   getAllStudentTestSummary 
 };
