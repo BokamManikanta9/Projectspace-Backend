@@ -344,21 +344,23 @@ const getWeeklyContestParticipation = async (req, res) => {
       {
         $project: {
           _id: 0,
-          year: "$_id.year",
           month: "$_id.month",
           week: "$_id.week",
           participantsCount: { $size: "$participants" }
         }
       },
-      { $sort: { year: 1, month: 1, week: 1 } }
+      { $sort: { month: 1, week: 1 } }
     ];
 
     const result = await User.aggregate(pipeline);
 
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
 
     const formatted = result.map(r => ({
-      month: `${monthNames[r.month - 1]} ${r.year}`,
+      month: monthNames[r.month - 1], // Only month name
       week: r.week,
       participants: r.participantsCount
     }));
@@ -369,6 +371,7 @@ const getWeeklyContestParticipation = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch weekly participation" });
   }
 };
+
 
 
 
