@@ -47,7 +47,7 @@ route.post("/get-student-by-email", getStudentProfile);
 route.get("/drive-participation", getDriveParticipationStats);
 route.get("/student-test-summary", getAllStudentTestSummary);
 route.get('/weekly-logins', getWeeklyLoginCount);
-router.get("/daily-logins", getDailyLoginCount);
+route.get("/daily-logins", getDailyLoginCount);
 
 
 module.exports = route;
