@@ -18,7 +18,9 @@ const {
   getWeeklyContestParticipation,
   getStudentProfile ,
   getDriveParticipationStats ,
-  getAllStudentTestSummary
+  getAllStudentTestSummary,
+  getWeeklyLoginCount,
+  getDailyLoginCount
 } = require('../controlers/Usercontroller');
 
 
@@ -44,5 +46,8 @@ route.get("/weekly-contest-participation", getWeeklyContestParticipation);
 route.post("/get-student-by-email", getStudentProfile);
 route.get("/drive-participation", getDriveParticipationStats);
 route.get("/student-test-summary", getAllStudentTestSummary);
+route.get('/weekly-logins', getWeeklyLoginCount);
+router.get("/daily-logins", getDailyLoginCount);
+
 
 module.exports = route;

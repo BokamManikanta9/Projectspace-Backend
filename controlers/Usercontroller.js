@@ -482,6 +482,120 @@ const getAllStudentTestSummary = async (req, res) => {
 
 
 
+const getWeeklyLoginCount = async (req, res) => {
+  try {
+    const pipeline = [
+      { $unwind: "$loginHistory" },
+      {
+        $addFields: {
+          year: { $year: "$loginHistory" },
+          month: { $month: "$loginHistory" },
+          day: { $dayOfMonth: "$loginHistory" }
+        }
+      },
+      {
+        $addFields: {
+          week: {
+            $switch: {
+              branches: [
+                { case: { $lte: ["$day", 7] }, then: "Week 1" },
+                { case: { $lte: ["$day", 14] }, then: "Week 2" },
+                { case: { $lte: ["$day", 21] }, then: "Week 3" },
+                { case: { $lte: ["$day", 31] }, then: "Week 4" }
+              ],
+              default: "Unknown"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: "$year",
+            month: "$month",
+            week: "$week"
+          },
+          totalLogins: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          week: "$_id.week",
+          month: "$_id.month",
+          year: "$_id.year",
+          totalLogins: 1
+        }
+      },
+      { $sort: { year: 1, month: 1, week: 1 } }
+    ];
+
+    const result = await User.aggregate(pipeline);
+
+    // Optional: Convert month number to month name
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const formatted = result.map(item => ({
+      month: monthNames[item.month - 1],
+      week: item.week,
+      totalLogins: item.totalLogins
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Error fetching weekly login count:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+const getDailyLoginCount = async (req, res) => {
+  try {
+    const pipeline = [
+      { $unwind: "$loginHistory" },
+      {
+        $project: {
+          dayOfWeek: { $dayOfWeek: "$loginHistory" } // 1 (Sun) to 7 (Sat)
+        }
+      },
+      {
+        $group: {
+          _id: "$dayOfWeek",
+          totalLogins: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          day: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$_id", 1] }, then: "Sun" },
+                { case: { $eq: ["$_id", 2] }, then: "Mon" },
+                { case: { $eq: ["$_id", 3] }, then: "Tue" },
+                { case: { $eq: ["$_id", 4] }, then: "Wed" },
+                { case: { $eq: ["$_id", 5] }, then: "Thu" },
+                { case: { $eq: ["$_id", 6] }, then: "Fri" },
+                { case: { $eq: ["$_id", 7] }, then: "Sat" },
+              ],
+              default: "Unknown"
+            }
+          },
+          logins: "$totalLogins"
+        }
+      },
+      { $sort: { _id: 1 } }
+    ];
+
+    const result = await User.aggregate(pipeline);
+    res.json(result);
+  } catch (err) {
+    console.error("Error fetching daily login count:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 
 module.exports = {
@@ -498,5 +612,7 @@ module.exports = {
   getWeeklyContestParticipation,
   getStudentProfile,
   getDriveParticipationStats,
-  getAllStudentTestSummary
+  getAllStudentTestSummary,
+  getWeeklyLoginCount,
+  getDailyLoginCount
 };
