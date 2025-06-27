@@ -20,7 +20,8 @@ const {
   getDriveParticipationStats ,
   getAllStudentTestSummary,
   getWeeklyLoginCount,
-  getDailyLoginCount
+  getDailyLoginCount,
+  resetPassword
 } = require('../controlers/Usercontroller');
 
 
@@ -48,6 +49,7 @@ route.get("/drive-participation", getDriveParticipationStats);
 route.get("/student-test-summary", getAllStudentTestSummary);
 route.get('/weekly-logins', getWeeklyLoginCount);
 route.get("/daily-logins", getDailyLoginCount);
+route.post("/forgot-password", resetPassword);
 
 
 module.exports = route;

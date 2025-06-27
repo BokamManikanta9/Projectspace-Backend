@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
 
 
   if (!email || !password)
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.status(500).json({ message: 'Email and password are required' });
 
   try {
     const user = await User.findOne({ email });
@@ -67,6 +67,40 @@ const loginUser = async (req, res) => {
   } catch (err) {
     console.error('loginUser error:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, password, confirmPassword } = req.body;
+
+    if (!email || !password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error in resetPassword:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -610,5 +644,6 @@ module.exports = {
   getDriveParticipationStats,
   getAllStudentTestSummary,
   getWeeklyLoginCount,
-  getDailyLoginCount
+  getDailyLoginCount,
+  resetPassword
 };
