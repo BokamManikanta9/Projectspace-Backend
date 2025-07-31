@@ -4,7 +4,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const Routes = require("./roters/router2")
+// const Routes = require("./roters/router2")
+const Routes = require("./roters/router1")
+
 const cors= require("cors")
 const bodypasrer = require("body-parser")
 const mongoose = require("mongoose")
